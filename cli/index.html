@@ -23,10 +23,20 @@
 
         </div>
         <div id="gameRoom" style="display: none;">
-
+            <h1>Player 1 (You):</h1>
+            <div id="choice1">
+                <button onclick="sendChoice('Rock')">Rock</button>
+                <button onclick="sendChoice('Paper')">Paper</button>
+                <button onclick="sendChoice('Scissors')">Scissors</button>
+            </div>
+        <h1>Player 2:</h1>
+            <div id="choice2">
+                <p id="state">waiting...</p>
+            </div>
         </div>
         <div id="endscreen">
-
+            <div id="resultW" style="display: none;">YOU WIN!</div>
+            <div id="resultL" style="display: none;">You lose.</div>
         </div>
     </div>
 

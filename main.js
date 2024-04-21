@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createGame', () => {
-        const roomId = makeId(6);
+        const roomId = makeId(5);
         rooms[roomId] = {};
         socket.join(roomId);
         socket.emit("newGame", {roomId: roomId})
@@ -39,11 +39,60 @@ io.on('connection', (socket) => {
         if(rooms[data.roomId] != null) { //checks if room exists
             socket.join(data.roomId) //joins exiting room
             socket.to(data.roomId).emit("playerConnect", {}) //emitting player connect
-            socket.emit("PlayerConnect");
+            socket.emit("playerConnect");
         }
     })
 
+    socket.on("p1Choice", (data) => {
+        let playerChoice = data.playerChoice;
+        rooms[data.roomId].p1Choice = playerChoice;
+        socket.to(data.roomId).emit("p1Choice",{playerChoice : data.playerChoice}); //emits p1 made choice
+        if(rooms[data.roomId].p2Choice != null) {
+            winFunc(data.roomId)
+        }
+    })
+
+    socket.on("p2Choice", (data) => {
+        let playerChoice = data.playerChoice;
+        rooms[data.roomId].p2Choice = playerChoice;
+        socket.to(data.roomId).emit("p2Choice",{playerChoice : data.playerChoice}); //emits p2 made choice
+        if(rooms[data.roomId].p1Choice != null) {
+            winFunc(data.roomId)
+        }
+    })
 });
+
+function winFunc(roomId) {
+    let p1Choice = rooms[roomId].p1Choice;
+    let p2Choice = rooms[roomId].p2Choice;
+    let winner = null;
+    if (p1Choice === p2Choice) {
+        winner = "d";
+    } else if (p1Choice == "Paper") {
+        if (p2Choice == "Scissors") {
+            winner = "p2";
+        } else {
+            winner = "p1";
+        }
+    } else if (p1Choice == "Rock") {
+        if (p2Choice == "Paper") {
+            winner = "p2";
+        } else {
+            winner = "p1";
+        }
+    } else if (p1Choice == "Scissors") {
+        if (p2Choice == "Rock") {
+            winner = "p2";
+        } else {
+            winner = "p1";
+        }
+    }
+    io.sockets.to(roomId).emit("result", {
+        winner: winner
+    });
+    rooms[roomId].p1Choice = null;
+    rooms[roomId].p2Choice = null;
+}
 
 
 server.listen(3000, () => {
